@@ -1,7 +1,13 @@
+import os
+import random
+from datetime import datetime
+
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.db.models import Count, Sum, Min, Max, Avg, F, Q
+from django.template import loader
 
+from helloDjango import settings
 from mainapp.models import UserEntity, FruitEntity, StoreEntity
 
 
@@ -28,6 +34,8 @@ def user_list2(request):
     ]
     msg= '最优秀的学员'
     return render(request, 'user/list.html', locals())
+
+
 # 增加模型中的数据
 def add_user(request):
     # 从GET请求中读取数据
@@ -106,7 +114,40 @@ def user_list3(request):
     users = UserEntity.objects.all() # 查询所有， list
     # UserEntity.objects.get(pk=id) # 根据主键值查询一个实体对象
     msg= '最优秀的学员'
-    return render(request, 'user/list.html', locals())
+
+    # error_index = random.randint(0, users.count()-1)
+
+    vip = {
+        'name': 'disen',
+        'money': 20000
+    }
+    # # 加载模板
+    # templates = loader.get_template('user/list.html')
+    #
+    # # 渲染模板
+    # html = templates.render(context={
+    #     'msg': msg,
+    #     'users': users
+    # })
+
+    # names=['Disen', 'Jack', 'Lucy']
+    names =[]
+
+    info = '<h3>用户的个人简要</h3><p>我的家乡西安</p><p>我爱好读书(python相关)</p>'
+
+    now = datetime.now()
+
+    file_dir =os.path.join(settings.BASE_DIR, 'mainapp/')
+    files = {file_name: os.stat(file_dir+file_name)
+             for file_name in os.listdir(file_dir)
+             if os.path.isfile(file_dir+file_name)}
+
+    price = 19.1356
+
+    img_html = "<img width=200 height=200 src='/media/store/sg1.jpg'>"
+    # 加载加渲染
+    html = loader.render_to_string('user/list.html', locals())
+    return HttpResponse(html, status=200) # 增加响应头 ？？？
 
 
 def find_fruit(request):

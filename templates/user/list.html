@@ -3,13 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <title>主页</title>
+    {% include 'base_css.html' %}
+    <style>
+        .even {
+            background-color: lightgoldenrodyellow;
+        }
+
+        .red {
+            background-color: red;
+        }
+
+        .blue {
+            background-color: blue;
+        }
+
+        .green {
+            background-color: green;
+        }
+    </style>
 </head>
-<body>
-    <h3>{{ msg }}</h3>
-    <ul>
+<body class="container">
+<h3>{{ msg }}</h3>
+<p style="color: green">
+    第三个用户名： {{ users.2.name }}
+</p>
+<p style="color: red">
+    请客的人：{{ error_index }}
+</p>
+<p style="color: white; background-color: blue">
+    <span>VIP:</span>
+    <span>{{ vip.name.upper }}-{{ vip.money }}</span>
+</p>
+<ul>
+    {% for key, value in vip.items %}
+        <li>{{ key }} = {{ value }}</li>
+    {% endfor %}
+
+</ul>
+<table class="table table-bordered table-hover">
+    <thead>
+    <th>ID</th>
+    <th>账号</th>
+    <th>真实姓名</th>
+    <th>手机号</th>
+    </thead>
+    <tbody>
+    {% if users %}
         {% for user in users %}
-            <li>{{ user.id }} {{ user.name }}</li>
+{#            <tr class="{% cycle "red" "blue" "green" %}">#}
+{#            <tr {% ifequal forloop.counter 3 %}class="even" {% endifequal %}>#}
+                <tr {% ifequal forloop.counter|divisibleby:2 0 %}class="even" {% endifequal %}>
+                <td>{{ user.id }}</td>
+                <td>{{ user.name }}</td>
+                <td>{{ user.realprofile.real_name }}</td>
+                <td>{{ user.phone }}</td>
+            </tr>
         {% endfor %}
-    </ul>
+    {% else %}
+        <tr>
+            <td colspan="4">无数据</td>
+        </tr>
+    {% endif %}
+    </tbody>
+</table>
+<select>
+    {% for name in names %}
+        <option>{{ name }}</option>
+    {% empty %}
+        <option>空</option>
+    {% endfor %}
+</select>
+<!-- 网页HTML的注释 -->
+{#单行注释#}
+{% comment %}
+for 循环 + if条件
+{% endcomment %}
+{% autoescape on %}
+    <pre>
+       {{ info }}
+    </pre>
+{% endautoescape %}
+{% include 'base_js.html' %}
+
+{{ now|date:"Y-m-d H:i:s" }}
+
+<p>
+{#    默认是1为小数 #}
+    价格：{{ price|floatformat:2 }}
+</p>
+<p>
+{#    safe 不转义#}
+    {{ img_html|safe }}
+</p>
+
+{% for path, f_stat in files.items %}
+    <p>
+        {{ path|ellipse }}的文件大小{{ f_stat.st_size|filesizeformat }}
+    </p>
+{% endfor %}
+
+
 </body>
 </html>

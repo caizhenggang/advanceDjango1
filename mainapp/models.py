@@ -1,6 +1,16 @@
 import uuid
 
+from django.contrib.auth.hashers import make_password
 from django.db import models
+
+
+class UserManger(models.Manager):
+    def update(self, **kwargs):
+        password = kwargs.get('password', None)
+        if password and len(password) < 50:
+            kwargs['password'] = make_password(password)
+
+        super().update(**kwargs)
 
 
 # Create your models here.
@@ -15,9 +25,22 @@ class UserEntity(models.Model):
                              verbose_name='手机号',
                              blank=True,  # 站点的表单字段可以为空
                              null=True)  # 数据库的字段可以为null
+    password = models.CharField(max_length=100,
+                                verbose_name='口令',
+                                blank=True,
+                                null=True)
+    objects = UserManger()
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        if len(self.password) < 50:
+            # 明文转密文
+            self.password = make_password(self.password)
+        # 保存
+        super().save()
 
     def __str__(self):
-        return self.name   # 站点显示对象的字符串信息
+        return self.name  # 站点显示对象的字符串信息
 
     class Meta:
         # 指定当前模型类映射成哪一个表
@@ -26,6 +49,7 @@ class UserEntity(models.Model):
         verbose_name = '客户管理'
         # 设置复数的表示方式
         verbose_name_plural = verbose_name
+
 
 class RealProfile(models.Model):
     # 声明一对一的关联关系
@@ -52,19 +76,23 @@ class RealProfile(models.Model):
         db_table = 't_user_profile'
         verbose_name = verbose_name_plural = '实名认证表'
 
+
 # 购物车
 class CartEntity(models.Model):
     class Meta:
         db_table = 't_cart'
         verbose_name = verbose_name_plural = '购物车表'
+
     user = models.OneToOneField(UserEntity,
                                 on_delete=models.CASCADE,
                                 verbose_name='账户')
     no = models.CharField(primary_key=True,
                           max_length=10,
                           verbose_name='购物车编号')
+
     def __str__(self):
         return self.no
+
 
 # 水果分类模型
 class CateTypeEntity(models.Model):
@@ -78,11 +106,12 @@ class CateTypeEntity(models.Model):
         return self.name
 
     class Meta:
-        app_label = 'mainapp' # 指定应用的名称
+        app_label = 'mainapp'  # 指定应用的名称
         db_table = 't_category'
         ordering = ['-order_num']  # 指定排序字段， - 表示降序
         verbose_name = '水果分类'
         verbose_name_plural = verbose_name
+
 
 # 水果模型
 class FruitEntity(models.Model):
@@ -125,14 +154,16 @@ class FruitEntity(models.Model):
         verbose_name = '水果表'
         verbose_name_plural = verbose_name
 
+
 class TagEntity(models.Model):
     name = models.CharField(max_length=50,
                             unique=True,
                             verbose_name='标签名')
     order_num = models.IntegerField(default=1,
                                     verbose_name='序号')
+
     def __str__(self):
-        return self.name   # 站点显示对象的字符串信息
+        return self.name  # 站点显示对象的字符串信息
 
     class Meta:
         db_table = 't_tag'
@@ -151,18 +182,19 @@ class FruitCartEntity(models.Model):
                               verbose_name='水果名')
     cnt = models.IntegerField(verbose_name='数量',
                               default=1)
+
     def __str__(self):
         return self.fruit.name + ':' + self.cart.no
 
     @property
     def price1(self):
         # 属性方法在后台显示时没有verbose_name，如何解决
-        return self.fruit.price # 从获取主的对象属性
+        return self.fruit.price  # 从获取主的对象属性
 
     @property
     def price(self):
         # 属性方法在后台显示时没有verbose_name，如何解决
-        return round(self.cnt*self.fruit.price, 2)
+        return round(self.cnt * self.fruit.price, 2)
 
     class Meta:
         db_table = 't_fruit_cart'
@@ -193,14 +225,14 @@ class StoreEntity(models.Model):
                              upload_to='store',
                              width_field='logo_width',
                              height_field='logo_height',
-                             blank=True, # 站点的表单字段可以为空
-                             null=True) # 数据库的字段可以为null
+                             blank=True,  # 站点的表单字段可以为空
+                             null=True)  # 数据库的字段可以为null
 
     logo_width = models.IntegerField(verbose_name='LOGO宽',
                                      null=True)
 
     logo_height = models.IntegerField(verbose_name='LOGO宽',
-                                     null=True)
+                                      null=True)
 
     summary = models.TextField(verbose_name='介绍',
                                blank=True,
@@ -216,11 +248,11 @@ class StoreEntity(models.Model):
     last_time = models.DateTimeField(verbose_name='最后变更时间',
                                      auto_now=True,
                                      null=True)
+
     @property
     def open_time(self):
         print(self.create_time)
         return self.create_time
-
 
     # 站点显示对象的字符串信息
     def __str__(self):
@@ -229,7 +261,7 @@ class StoreEntity(models.Model):
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         # 调用模型保存方式时调用
-        if not self.id: # 用于判断是否为新增
+        if not self.id:  # 用于判断是否为新增
             self.id = uuid.uuid4().hex
         super().save()
 
@@ -238,6 +270,7 @@ class StoreEntity(models.Model):
     def id_(self):
         # return str(self.id).replace('-','')
         return self.id.hex
+
     class Meta:  # 元数据
         db_table = 't_store'
         unique_together = (('name', 'city'),)

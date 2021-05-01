@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Regist2</title>
+</head>
+<body>
+<p>
+<form method="get" enctype="application/x-www-form-urlencoded">
+    <input name="name" placeholder="username">
+    <br>
+    <input name="phone" placeholder="phone">
+    <br>
+    爱好：
+    {% for love in loves %}
+        {# 默认选择第一项和最后一项的爱好#}
+        <input type="checkbox"
+               {% if forloop.first or forloop.last %}
+                    checked
+               {% endif %} 
+               name="love" value="{{ love }}">{{ love }}
+    {% endfor %}
+    <br>
+    <button>提交</button>
+</form>
+<p>
+    GET请求的查询参数<br>
+<ul>
+    {% for key, value in request.GET.items %}
+        {% ifnotequal key 'love' %}
+            <li>{{ key }}: {{ value }}</li>
+        {% endifnotequal %}
+    {% endfor %}
+    <li>
+        爱好：
+        {% for item in select_loves %}
+            {{ item }},
+        {% endfor %}
+    </li>
+</ul>
+
+</p>
+
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Regist</title>
+</head>
+<body>
+<p>
+<form method="post" enctype="application/x-www-form-urlencoded">
+    <input name="name" placeholder="username">
+    <br>
+    <input name="phone" placeholder="phone">
+    <br>
+    <input name="password" type="password" placeholder="password">
+    <br>
+    <input type="date" placeholder="生日">
+    <br>
+    <button>提交</button>
+</form>
+</p>
+
+<p>
+    <button onclick="up_ajax()">ajax上传json数据</button>
+    <script>
+        function up_ajax() {
+            data = {
+                name: document.forms[0].name.value,
+                phone: document.forms[0].phone.value
+            };
+            fetch('', {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                }
+            }).then(response => response.text())
+                .then(text => {
+                    document.write(text)
+                });
+        }
+    </script>
+</p>
+
+<p>
+    请求路径-path： {{ request.path }}
+    <br>
+    请求的URI(统一资源标识符): {{ request.get_raw_uri }}
+</p>
+<pre>
+        URL: 统一资源定位符，资源的网络地址
+        URI: 同一资源标识符，用于RESTful规范中，可以理解为URL
+    </pre>
+<p>
+    请求方法：{{ request.method }}
+    <br>
+    content_type: {{ request.content_type }}
+    <br>
+    encoding: {{ request.encoding }}
+    <br>
+    content_params: {{ request.content_params }}
+</p>
+<p>
+    body: {{ request.body }}
+</p>
+</body>
+</html>

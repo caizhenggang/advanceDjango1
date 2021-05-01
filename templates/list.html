@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>查询列表</title>
+    <style>
+        .page{
+            text-decoration: none;
+            cursor: pointer;
+            padding: 5px;
+            margin: 5px;
+            background-color: lightgray;
+        }
+        .active {
+            background-color: lightblue;
+        }
+
+    </style>
+</head>
+<body>
+<form>
+    <input name="wd" placeholder="名称或者价格">
+    <button>搜索</button>
+</form>
+<h3>订单搜索结果</h3>
+<table border="1" cellpadding="2" cellspacing="0" width="100%">
+    <thead>
+    <th>ID</th>
+    <th>名称</th>
+    <th>单价</th>
+    <th>支付状态</th>
+    </thead>
+    <tbody>
+    {% for order in pager.object_list %}
+        <tr>
+            <td>{{ order.id }}</td>
+            <td>{{ order.title }}</td>
+            <td>{{ order.price }}</td>
+            <td>{{ order.pay_status_title }}</td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="4">查无此数据</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<p style="text-align: center">
+
+    <a  {% if pager.has_previous %} href="?page={{ pager.previous_page_number }}&wd={{ wd }}"{% endif %}>&lt;</a>
+
+    {% for p in paginator.page_range %}
+        {% if pager.number == p %}
+            <a class="page active">{{ p }}</a>
+            {% else %}
+            <a class="page" href="?page={{ p }}&wd={{ wd }}">{{ p }}</a>
+        {% endif %}
+    {% endfor %}
+
+    <a {% if pager.has_next %} href="?page={{ pager.next_page_number }}&wd={{ wd }}"{% endif %}>&gt;</a>
+
+</p>
+</body>
+</html>

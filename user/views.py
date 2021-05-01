@@ -1,20 +1,29 @@
 import os
+<<<<<<< HEAD
 import random
 import uuid
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.paginator import Paginator
 from django.db.models import Q
+=======
+import uuid
+
+from django.core.files.uploadedfile import InMemoryUploadedFile
+>>>>>>> b37281cb98517eceaa6982e7bafafee32895456a
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 
 # Create your views here.
 from django.views.decorators.csrf import csrf_exempt
 import json
+<<<<<<< HEAD
 from PIL import Image, ImageDraw, ImageFont
 
 from common.code import new_code_str
 from user.models import Order
+=======
+>>>>>>> b37281cb98517eceaa6982e7bafafee32895456a
 
 
 @csrf_exempt
@@ -175,6 +184,7 @@ def new_code(request):
     # 向手机发送验证码； 华为云、阿里云：短信服务
 
     return HttpResponse('以向 %s 手机发送验证码！' % phone)
+<<<<<<< HEAD
 
 def new_img_code(request):
 
@@ -224,3 +234,5 @@ def order_list(request):
 
     return render(request, 'list.html', locals())
 
+=======
+>>>>>>> b37281cb98517eceaa6982e7bafafee32895456a

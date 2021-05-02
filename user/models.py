@@ -1,7 +1,6 @@
 from django.db import models
 
 # Create your models here.
-<<<<<<< HEAD
 
 
 class Order(models.Model):
@@ -22,5 +21,3 @@ class Order(models.Model):
 
     class Meta:
         db_table = 't_order'
-=======
->>>>>>> b37281cb98517eceaa6982e7bafafee32895456a

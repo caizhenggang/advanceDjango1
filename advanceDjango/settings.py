@@ -15,7 +15,6 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
@@ -27,7 +26,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -38,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'user',
+    'stockapp',
 ]
 
 MIDDLEWARE = [
@@ -48,6 +47,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'middleware.check_login.CheckLoginMiddleware',
 ]
 
 ROOT_URLCONF = 'advanceDjango.urls'
@@ -72,7 +72,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'advanceDjango.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
@@ -87,7 +86,6 @@ DATABASES = {
         'CHARSET': 'utf8'
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
@@ -107,7 +105,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
@@ -121,8 +118,58 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# 配置Django的日志
+LOGGING = {
+    'version': 1.0,
+    'formatters': {
+        'base': {
+            'format': '[%(asctime)s %(name)s ] %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        }
+    },
+    'handlers': {
+        'out': {
+            'class': 'logging.StreamHandler',
+            'level': 'INFO',
+            'formatter': 'base'
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'level': 'WARNING',
+            'formatter': 'base',
+            'filename': f'{BASE_DIR}/warn.log'
+        }
+    },
+    'loggers': {
+        # 日志记录器 django.server
+        'django.server': {
+            'handlers': ['out', 'file'],
+            'level': 'CRITICAL',
+            'propagate': False
+        },
+        'mylogger': {
+            'handlers': ['out', 'file'],
+            'level': 'INFO',
+            'propagate': True
+        }
+    }
+}
+
+
+# 配置缓冲
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': F'{BASE_DIR}/mycache',
+        'TIMEOUT': 300,
+        'OPTIONS': {
+            'MAX_ENTRIES': 500,
+            'CULL_FREQUENCY': 3
+        }
+    }
+}

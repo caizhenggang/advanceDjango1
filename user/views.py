@@ -12,9 +12,10 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 import json
 from PIL import Image, ImageDraw, ImageFont
-
+from common import code
 from common.code import new_code_str
 from user.models import Order
+from django.core.cache import cache
 
 
 @csrf_exempt
@@ -132,13 +133,18 @@ def login(request):
     phone = request.GET.get('phone')
     code = request.GET.get('code')
 
+    # 判断缓存中是否存在phone
+    # 存在则读取
     if all((
-            phone == request.session.get('phone'),
-            code == request.session.get('code')
+            cache.has_key(phone),
+            cache.get(phone) == code
     )):
         resp = HttpResponse('登录成功！')
         token = uuid.uuid4().hex  # 保存到缓存
         resp.set_cookie('token', token)
+
+        # 删除缓存
+        cache.delete(phone)
 
         return resp
 
@@ -156,20 +162,24 @@ def logout(request):
 
 def list(request):
     # 验证是否登录
-    if request.COOKIES.get('token'):
-        return HttpResponse('正在跳转到主页！')
+
     return HttpResponse('请先登录！')
 
 
 def new_code(request):
     # 生成手机验证码
     # 随机产生验证码；大小写字母+数字
-    code_txt = 'Xab9'
+    code_txt = code.new_code_str(4)
+    print(code_txt)
 
-    phone = request.GET.get('phone')
-    # 保存到session中
+    phone = request.GET.get('phone', '')
+    # 将验证码保存到session中
     request.session['code'] = code_txt
     request.session['phone'] = phone
+
+    # 将验证码保存到cache
+    # timeout是缓存的时间
+    cache.set(phone, code_txt, timeout=60)
 
     # 向手机发送验证码； 华为云、阿里云：短信服务
 

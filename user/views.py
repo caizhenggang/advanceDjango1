@@ -1,5 +1,7 @@
 import os
 import random
+import string
+
 from django.core.paginator import Paginator
 from django.db.models import Q
 import uuid
@@ -9,9 +11,12 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 
 # Create your views here.
+from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
 import json
 from PIL import Image, ImageDraw, ImageFont
+
+import signals
 from common import code
 from common.code import new_code_str
 from user.models import Order
@@ -159,11 +164,15 @@ def logout(request):
 
     return resp
 
-
+# @cache_page(timeout=10,
+#             cache='html',
+#             key_prefix='page')
 def list(request):
     # 验证是否登录
+    chrs = string.ascii_letters
+    char = random.choice(chrs)
 
-    return HttpResponse('请先登录！')
+    return HttpResponse('用户列表页面: <br> %s'%char)
 
 
 def new_code(request):
@@ -173,6 +182,17 @@ def new_code(request):
     print(code_txt)
 
     phone = request.GET.get('phone', '')
+    print(phone)
+
+    # 发送信号
+    # sender名字可以根据需求设置
+    # 关键参数列表，根据信号定义的参数列表传值
+    signals.codeSignal.send('new_code',
+                            path=request.path,
+                            phone=phone,
+                            code=code_txt)
+
+
     # 将验证码保存到session中
     request.session['code'] = code_txt
     request.session['phone'] = phone

@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'user',
     'stockapp',
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -48,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'middleware.check_login.CheckLoginMiddleware',
+    'middleware.cache_page.CachePageMiddleware',
 ]
 
 ROOT_URLCONF = 'advanceDjango.urls'
@@ -83,9 +85,13 @@ DATABASES = {
         'PORT': 3306,
         'USER': 'root',
         'PASSWORD': '123456',
-        'CHARSET': 'utf8'
+        'OPTIONS': {
+            'init_command': 'SET sql_mode="STRICT_TRANS_TABLES"',
+            'charset': 'utf8mb4'
+        }
     }
 }
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
@@ -160,10 +166,9 @@ LOGGING = {
     }
 }
 
-
 # 配置缓冲
 CACHES = {
-    'default': {
+    'file': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': F'{BASE_DIR}/mycache',
         'TIMEOUT': 300,
@@ -171,5 +176,31 @@ CACHES = {
             'MAX_ENTRIES': 500,
             'CULL_FREQUENCY': 3
         }
+    },
+    'html': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    },
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        # "LOCATION": "redis://:你的密码@服务器地址:6379/0",
+        'LOCATION': 'redis://:1qaz2wsx@47.102.218.113:6379/10',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'SOCKET_CONNECT_TIMEOUT': 10,
+            'SOCKET_TIMEOUT': 10
+        }
     }
 }
+
+# 配置SESSION
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_COOKIE_NAME = 'SESSION_ID'
+SESSION_COOKIE_PATH = '/'
+SESSION_CACHE_ALIAS = 'default'  # cache的别名
+SESSION_COOKIE_AGE = 1209600  # 两周的有效时间
+
+# 配置Celery
+CELERY_IMPORTS = ('stockapp.tasks',)
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_TASK_ALWAYS_EAGER = True
